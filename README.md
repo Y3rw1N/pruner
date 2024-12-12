@@ -9,7 +9,7 @@ pkg add curl jq -y
 
 then clone the repository and enter its directory
 ```sh
-git clone
+git clone https://github.com/Y3rw1N/pruner
 cd pruner
 ./pruner --help
 ```
