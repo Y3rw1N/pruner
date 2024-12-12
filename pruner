@@ -28,11 +28,7 @@ FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
 
 help_message() {
-<<<<<<< HEAD
-echo "usage: $0 [option] [argument] [theme OR font]
-=======
 echo "usage: $0 [option] [--argument] [theme OR font]
->>>>>>> 7269ebd (:D)
   remove:
     -f, --font
     -t, --theme
