@@ -29,7 +29,7 @@ FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
 
 help_message() {
-echo "usage: $0 [option] [patern] [theme OR font]
+echo "usage: $0 [option] [argument] [theme OR font]
   remove:
     -f, --font
     -t, --theme
