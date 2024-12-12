@@ -51,7 +51,7 @@ echo "usage: $0 [option] [--argument] [theme OR font]
 
 print_error() {
 	echo -e "$1" >&2	
-	exit 1
+	return 1
 }
 
 [[ ! -f "$json_file" ]] && print_error "the download source store was deleted or renamed\nwithout this file the script will be unusable"
