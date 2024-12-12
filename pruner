@@ -1,10 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # Script name: pruner
 # Author: Y3rw1N
-# Creado en termux con neovim
-# Este script fue creado con intenciones de ser un "atajo"
-# para lo que no les gusta personalizar la terminal manualmente
-# y tambien es para sistemas android con la terminal termux instalada
+# Created in Termux with Neovim
+# This script was created as a "shortcut" for people who don't like to do everything manually
+# The script is intended for Android with the Termux terminal emulator installed
 
 set -eo pipefail
 trap 'echo "There is an error on line $LINENO"; exit 1' ERR
@@ -29,7 +28,11 @@ FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
 
 help_message() {
+<<<<<<< HEAD
 echo "usage: $0 [option] [argument] [theme OR font]
+=======
+echo "usage: $0 [option] [--argument] [theme OR font]
+>>>>>>> 7269ebd (:D)
   remove:
     -f, --font
     -t, --theme
