@@ -1,0 +1,24 @@
+{
+	"fonts": {
+		"caskaydia-cove": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/CascadiaCode/Regular/CaskaydiaCoveNerdFontMono-Regular.ttf",
+		"fira-code": "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFontMono-Regular.ttf",
+		"hack": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/Hack/Regular/HackNerdFontMono-Regular.ttf",
+    "iosevka": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/Iosevka/IosevkaNerdFontMono-Regular.ttf",
+    "iosevka-term": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/IosevkaTerm/IosevkaTermNerdFontMono-Regular.ttf",
+		"jetbrainsmono-nl": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/JetBrainsMono/NoLigatures/Regular/JetBrainsMonoNLNerdFontMono-Regular.ttf",
+		"mononoki": "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Mononoki/Regular/MononokiNerdFontMono-Regular.ttf"
+	},
+
+	"colorschemes": {
+    "ayu-dark": "https://github.com/AvinashReddy3108/Gogh4Termux/raw/refs/heads/master/ayu-dark.properties",
+		"catppuccin-frappe": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-frappe.properties",
+		"catppuccin-latte": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-latte.properties",
+		"catppuccin-mocha": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-mocha.properties",
+		"catppuccin-macchiato": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-macchiato.properties",
+    "gruvbox-dark": "https://github.com/termux/termux-styling/raw/refs/heads/master/app/src/main/assets/colors/gruvbox-dark.properties",
+    "rose-pine": "https://github.com/rose-pine/termux/raw/f4370670206fed8a12b306ffc848230472f17ba8/app/src/main/assets/colors/ros%C3%A9-pine.properties",
+		"tokyonight-day": "https://github.com/Iamafnan/termux-tokyonight/raw/refs/heads/main/colorschemes/tokyonight-day.properties",
+		"tokyonight-night": "https://github.com/Iamafnan/termux-tokyonight/raw/refs/heads/main/colorschemes/tokyonight-night.properties",
+		"tokyonight-storm": "https://github.com/Iamafnan/termux-tokyonight/raw/refs/heads/main/colorschemes/tokyonight-storm.properties"
+	}
+}

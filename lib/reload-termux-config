@@ -1,0 +1,19 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+reload_settings() {
+  loading_system() {
+    local spinner='|/-\'
+    while kill -0 "$1" 2>/dev/null
+    do
+      for (( i=0; i<${#spinner}; i++ ))
+      do
+        printf "\r%c\e[?25l" "${spinner:i:1}"
+        sleep 0.1
+      done
+    done
+    printf "\r\e[?25h"
+  }
+  (termux-reload-settings) &
+  loading_system $!
+  wait $!
+}
