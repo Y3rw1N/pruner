@@ -179,7 +179,7 @@ list_ft() {
       ;;
 
     *)
-      echo "xd"
+      echo "$0: $1: invalid option"
       ;;
   esac
 }
@@ -234,7 +234,7 @@ remove_ft_files() {
 			;;
 
 		*)
-			print_error "invalid option: $subcommand"
+			print_error "$0: $1: invalid option"
 			;;
 	esac
 }
@@ -277,7 +277,7 @@ set_ft() {
       echo "$filename done"
       ;;
     *)
-      print_error "error"
+      print_error "$0: $1: invalid option"
       ;;
   esac
 }
