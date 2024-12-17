@@ -10,9 +10,6 @@ trap 'echo "There is an error on line $LINENO"; exit 1' ERR
 
 source "$(dirname "$0")/lib/reload-termux-config"
 
-command -v jq &>>/dev/null || { echo "jq is not installed"; exit 1; }
-command -v curl &>>/dev/null || { echo "curl is not installed"; exit 1; }
-
 script_version="1.0"
 json_file="$(find "$(dirname "$0")/" -maxdepth 2 -type f -name "style.json")"
 
@@ -26,6 +23,19 @@ PRUNER_DIRECTORY="$TERMUX_DIRECTORY/.pruner"
 THEMES_DIRECTORY="$PRUNER_DIRECTORY/themes"
 FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
+
+error_msg() {
+	echo -e "$1" >&2	
+	exit 1
+}
+
+for d in curl jq
+do
+  if [[ -z "$(command -v "$d")" ]]
+  then
+    error_msg "${d} dependency is not installed\nplease install the dependency for the script to work"
+  fi
+done
 
 help_message() {
 echo "usage: $0 [option] [--argument] [theme OR font]
@@ -49,12 +59,7 @@ echo "usage: $0 [option] [--argument] [theme OR font]
 "
 }
 
-print_error() {
-	echo -e "$1" >&2	
-	return 1
-}
-
-[[ ! -f "$json_file" ]] && print_error "the download source store was deleted or renamed\nwithout this file the script will be unusable"
+[[ ! -f "$json_file" ]] && error_msg "the download source store was deleted or renamed\nwithout this file the script will be unusable"
 
 install_ft_files() {
 	local subcommand="$1"
@@ -75,17 +80,17 @@ install_ft_files() {
 			[[ ! -d "$THEMES_DIRECTORY" ]] && mkdir -p "$THEMES_DIRECTORY"
 			;;
 		*)
-			print_error "invalid option: $subcommand"
+			error_msg "invalid option: $subcommand"
 			;;
 	esac
 
-  [[ -z "$download_sources" || "$download_sources" == null ]] && print_error "This font or theme is not registered"
-	[[ -e "$target_file" ]] && print_error "you already have it installed stupid"
+  [[ -z "$download_sources" || "$download_sources" == null ]] && error_msg "This font or theme is not registered"
+	[[ -e "$target_file" ]] && error_msg "you already have it installed stupid"
 
   echo -e "Downloading \e[1m$filename\e[0m"
 	if ! curl -# -fSLo "$target_file" "$download_sources"
 	then
-		print_error "\033[31mdownload error\033[0m: maybe the URL has been changed or deleted"
+		error_msg "\033[31mdownload error\033[0m: maybe the URL has been changed or deleted"
 	fi
 	
 	echo -e "\e[1m$filename\e[0m has been downloaded successfully"
@@ -101,7 +106,7 @@ list_ft() {
   
   case "$subcommand" in
     -a | --all)
-      [[ -z "$registred_fonts" || -z "$registred_themes" ]] && print_error "This font or theme is not registered"
+      [[ -z "$registred_fonts" || -z "$registred_themes" ]] && error_msg "This font or theme is not registered"
   
       echo "fonts:"
       for FONT in $registred_fonts
@@ -137,8 +142,7 @@ list_ft() {
       ;;
 
     -f | --font)
-
-      [[ -z "$registred_fonts" ]] && print_error "no registred fonts found"
+      [[ -z "$registred_fonts" ]] && error_msg "no registred fonts found"
   
       echo "fonts:"
       for FONT in $registred_fonts
@@ -158,8 +162,7 @@ list_ft() {
       ;;
 
     -t | --theme)
-
-      [[ -z "$registred_themes" ]] && print_error "no registred themes found"
+      [[ -z "$registred_themes" ]] && error_msg "no registred themes found"
 
       echo "themes:"
       for THEME in $registred_themes
@@ -193,7 +196,7 @@ remove_ft_files() {
 			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]] && \
 				[[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
 			then
-				print_error "everything was already erased"
+				error_msg "everything was already erased"
 			fi
 			rm -rf "${THEMES_DIRECTORY:?}"/*
 			rm -rf "${FONTS_DIRECTORY:?}"/*
@@ -204,12 +207,12 @@ remove_ft_files() {
 		-f | --font)
 			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]]
 			then
-				print_error "no fonts to remove."
+				error_msg "no fonts to remove."
 			fi
 
 			if [[ ! -f "${FONTS_DIRECTORY}/${filename}.ttf" ]] 
 			then
-				print_error "this font could not be found because it does not exist."
+				error_msg "this font could not be found because it does not exist."
 			fi
 
 			rm -rf "${FONTS_DIRECTORY}/${filename}.ttf"
@@ -220,12 +223,12 @@ remove_ft_files() {
 		-t | --theme)
 			if [[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
 			then
-				print_error "no themes to remove."
+				error_msg "no themes to remove."
 			fi
 
 			if [[ ! -f "${THEMES_DIRECTORY}/${filename}.properties" ]]
 			then
-				print_error "this color scheme could not be found because it does not exist"
+				error_msg "this color scheme could not be found because it does not exist"
 			fi
 
 			rm -rf "${THEMES_DIRECTORY}/${filename}.properties"
@@ -234,7 +237,7 @@ remove_ft_files() {
 			;;
 
 		*)
-			print_error "$0: $1: invalid option"
+			error_msg "$0: $1: invalid option"
 			;;
 	esac
 }
@@ -254,7 +257,7 @@ set_ft() {
         return
       fi
 
-      [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && print_error "\033[31merror\033[0m: This font apparently does not exist"
+      [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && error_msg "\033[31merror\033[0m: This font apparently does not exist"
 
       cp "$FONTS_DIRECTORY/$filename.ttf" "$TERMUX_FONT_PATH"
       reload_settings
@@ -270,14 +273,14 @@ set_ft() {
         return
       fi
       
-      [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && print_error "this theme '$filename' not exists"
+      [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && error_msg "this theme '$filename' not exists"
 
       cp "$THEMES_DIRECTORY/$filename.properties" "$TERMUX_THEME_PATH"
       reload_settings
       echo "$filename done"
       ;;
     *)
-      print_error "$0: $1: invalid option"
+      error_msg "$0: $1: invalid option"
       ;;
   esac
 }
@@ -287,7 +290,7 @@ main() {
   local subcommand="$2"
   local filename="$3"
 
-  [[ "$#" -lt 1 || "$#" -gt 3 ]] && print_error "type '$0 --help' for more info"
+  [[ "$#" -lt 1 || "$#" -gt 3 ]] && error_msg "type '$0 --help' for more info"
 
   case "$command" in
 	  install)
@@ -306,13 +309,14 @@ main() {
       echo "$script_version"
       ;;
 	  --help)
-      [[ "$#" -ne 1 ]] && print_error "not exist subcommand"
+      [[ "$#" -ne 1 ]] && error_msg "not exist subcommand"
 		  help_message
 		  ;;
 	  *)
-		  print_error "argument not found: $1\ntype '$0 --help' for more info"
+		  error_msg "argument not found: $1\ntype '$0 --help' for more info"
 		  ;;
   esac
 }
 
 main "$@"
+exit 0
