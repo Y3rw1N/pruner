@@ -10,10 +10,11 @@ trap 'echo "There is an error on line $LINENO"; exit 1' ERR
 
 source "$(dirname "$0")/lib/reload-termux-config"
 
-script_version="1.0"
 json_file="$(find "$(dirname "$0")/" -maxdepth 2 -type f -name "style.json")"
 
 # CONST
+SCRIPT_VERSION="1.0"
+
 TERMUX_DIRECTORY="$HOME/.termux"
 TERMUX_FONT_PATH="$TERMUX_DIRECTORY/font.ttf"
 TERMUX_THEME_PATH="$TERMUX_DIRECTORY/colors.properties"
@@ -24,21 +25,19 @@ THEMES_DIRECTORY="$PRUNER_DIRECTORY/themes"
 FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
 
-error_msg() {
-	echo -e "$1" >&2	
+echoerr() {
+	echo -e "$@" >&2	
 	exit 1
 }
 
+# CHECK FOR MISSING DEPENDENCIES
 for d in curl jq
 do
-  if [[ -z "$(command -v "$d")" ]]
-  then
-    error_msg "${d} dependency is not installed\nplease install the dependency for the script to work"
-  fi
+  [[ -z "$(command -v "$d")" ]] && echoerr "${d} dependency is not installed\nplease install the dependency for the script to work"
 done
 
 help_message() {
-echo "usage: $0 [option] [--argument] [theme OR font]
+echo "usage: $0 [option] [--suboption] [theme OR font]
   remove:
     -f, --font
     -t, --theme
@@ -55,11 +54,10 @@ echo "usage: $0 [option] [--argument] [theme OR font]
   list:
     -f, --font
     -t, --theme
-    -a, --all
-"
+    -a, --all"
 }
 
-[[ ! -f "$json_file" ]] && error_msg "the download source store was deleted or renamed\nwithout this file the script will be unusable"
+[[ ! -f "$json_file" ]] && echoerr "the download source store was deleted or renamed\nwithout this file the script will be unusable"
 
 install_ft_files() {
 	local subcommand="$1"
@@ -80,17 +78,17 @@ install_ft_files() {
 			[[ ! -d "$THEMES_DIRECTORY" ]] && mkdir -p "$THEMES_DIRECTORY"
 			;;
 		*)
-			error_msg "invalid option: $subcommand"
+			echoerr "invalid option: $subcommand"
 			;;
 	esac
 
-  [[ -z "$download_sources" || "$download_sources" == null ]] && error_msg "This font or theme is not registered"
-	[[ -e "$target_file" ]] && error_msg "you already have it installed stupid"
+  [[ -z "$download_sources" || "$download_sources" == null ]] && echoerr "This font or theme is not registered"
+	[[ -e "$target_file" ]] && echoerr "you already have it installed stupid"
 
   echo -e "Downloading \e[1m$filename\e[0m"
 	if ! curl -# -fSLo "$target_file" "$download_sources"
 	then
-		error_msg "\033[31mdownload error\033[0m: maybe the URL has been changed or deleted"
+		echoerr "\033[31mdownload error\033[0m: maybe the URL has been changed or deleted"
 	fi
 	
 	echo -e "\e[1m$filename\e[0m has been downloaded successfully"
@@ -98,15 +96,21 @@ install_ft_files() {
 }
 
 list_ft() {
-  local subcommand="$1"
-  local registred_themes="$(jq -r '.["colorschemes"] | keys | .[]' "$json_file")"
-  local registred_fonts="$(jq -r '.["fonts"] | keys | .[]' "$json_file")"
-  local downloaded_themes="$(ls "$THEMES_DIRECTORY/"*.properties 2>/dev/null | xargs -n 1 basename 2>/dev/null | sed 's/.properties$//')"
-  local downloaded_fonts="$(ls "$FONTS_DIRECTORY/"*.ttf 2>/dev/null | xargs -n 1 basename 2>/dev/null | sed 's/.ttf$//')"
+  local subcommand="${1:--a}"
+  local registred_themes
+  local registred_fonts
+  local downloaded_themes
+  local downloaded_fonts
+
+  registred_themes="$(jq -r '.["colorschemes"] | keys | .[]' "$json_file")"
+  registred_fonts="$(jq -r '.["fonts"] | keys | .[]' "$json_file")"
+  downloaded_themes="$(find "$THEMES_DIRECTORY" -type f -print0 | xargs -0 -n 1 basename 2>/dev/null | sed 's/.properties$//' || true)"
+  downloaded_fonts="$(find "$FONTS_DIRECTORY" -type f -print0 | xargs -0 -n 1 basename 2>/dev/null | sed 's/.ttf$//' || true)"
+  
   
   case "$subcommand" in
     -a | --all)
-      [[ -z "$registred_fonts" || -z "$registred_themes" ]] && error_msg "This font or theme is not registered"
+      [[ -z "$registred_fonts" || -z "$registred_themes" ]] && echoerr "This font or theme is not registered"
   
       echo "fonts:"
       for FONT in $registred_fonts
@@ -142,7 +146,7 @@ list_ft() {
       ;;
 
     -f | --font)
-      [[ -z "$registred_fonts" ]] && error_msg "no registred fonts found"
+      [[ -z "$registred_fonts" ]] && echoerr "no registred fonts found"
   
       echo "fonts:"
       for FONT in $registred_fonts
@@ -162,7 +166,7 @@ list_ft() {
       ;;
 
     -t | --theme)
-      [[ -z "$registred_themes" ]] && error_msg "no registred themes found"
+      [[ -z "$registred_themes" ]] && echoerr "no registred themes found"
 
       echo "themes:"
       for THEME in $registred_themes
@@ -196,7 +200,7 @@ remove_ft_files() {
 			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]] && \
 				[[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
 			then
-				error_msg "everything was already erased"
+				echoerr "everything was already erased"
 			fi
 			rm -rf "${THEMES_DIRECTORY:?}"/*
 			rm -rf "${FONTS_DIRECTORY:?}"/*
@@ -207,12 +211,12 @@ remove_ft_files() {
 		-f | --font)
 			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]]
 			then
-				error_msg "no fonts to remove."
+				echoerr "no fonts to remove."
 			fi
 
 			if [[ ! -f "${FONTS_DIRECTORY}/${filename}.ttf" ]] 
 			then
-				error_msg "this font could not be found because it does not exist."
+				echoerr "this font could not be found because it does not exist."
 			fi
 
 			rm -rf "${FONTS_DIRECTORY}/${filename}.ttf"
@@ -223,12 +227,12 @@ remove_ft_files() {
 		-t | --theme)
 			if [[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
 			then
-				error_msg "no themes to remove."
+				echoerr "no themes to remove."
 			fi
 
 			if [[ ! -f "${THEMES_DIRECTORY}/${filename}.properties" ]]
 			then
-				error_msg "this color scheme could not be found because it does not exist"
+				echoerr "this color scheme could not be found because it does not exist"
 			fi
 
 			rm -rf "${THEMES_DIRECTORY}/${filename}.properties"
@@ -237,7 +241,7 @@ remove_ft_files() {
 			;;
 
 		*)
-			error_msg "$0: $1: invalid option"
+			echoerr "$0: $1: invalid option"
 			;;
 	esac
 }
@@ -257,7 +261,7 @@ set_ft() {
         return
       fi
 
-      [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && error_msg "\033[31merror\033[0m: This font apparently does not exist"
+      [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && echoerr "\033[31merror\033[0m: This font apparently does not exist"
 
       cp "$FONTS_DIRECTORY/$filename.ttf" "$TERMUX_FONT_PATH"
       reload_settings
@@ -273,14 +277,14 @@ set_ft() {
         return
       fi
       
-      [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && error_msg "this theme '$filename' not exists"
+      [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && echoerr "this theme '$filename' not exists"
 
       cp "$THEMES_DIRECTORY/$filename.properties" "$TERMUX_THEME_PATH"
       reload_settings
       echo "$filename done"
       ;;
     *)
-      error_msg "$0: $1: invalid option"
+      echoerr "$0: $1: invalid option"
       ;;
   esac
 }
@@ -290,7 +294,7 @@ main() {
   local subcommand="$2"
   local filename="$3"
 
-  [[ "$#" -lt 1 || "$#" -gt 3 ]] && error_msg "type '$0 --help' for more info"
+  [[ "$#" -lt 1 || "$#" -gt 3 ]] && echoerr "type '$0 --help' for more info"
 
   case "$command" in
 	  install)
@@ -306,14 +310,14 @@ main() {
       set_ft "$subcommand" "$filename"
       ;;
     --version)
-      echo "$script_version"
+      echo "$SCRIPT_VERSION"
       ;;
 	  --help)
-      [[ "$#" -ne 1 ]] && error_msg "not exist subcommand"
+      [[ "$#" -ne 1 ]] && echoerr "not exist subcommand"
 		  help_message
 		  ;;
 	  *)
-		  error_msg "argument not found: $1\ntype '$0 --help' for more info"
+		  echoerr "argument not found: $1\ntype '$0 --help' for more info"
 		  ;;
   esac
 }
