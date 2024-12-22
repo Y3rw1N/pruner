@@ -9,7 +9,7 @@
 		"mononoki": "https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/Mononoki/Regular/MononokiNerdFontMono-Regular.ttf"
 	},
 
-	"colorschemes": {
+	"themes": {
     "ayu-dark": "https://github.com/AvinashReddy3108/Gogh4Termux/raw/refs/heads/master/ayu-dark.properties",
 		"catppuccin-frappe": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-frappe.properties",
 		"catppuccin-latte": "https://github.com/catppuccin/termux/raw/refs/heads/main/themes/catppuccin-latte.properties",

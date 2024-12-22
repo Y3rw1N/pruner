@@ -30,37 +30,33 @@ echoerr() {
 	exit 1
 }
 
+if [[ "$OSTYPE" != "linux-android" ]]; then
+  echoerr "only for android OS with termux terminal installed"
+fi
+
 # CHECK FOR MISSING DEPENDENCIES
-for d in curl jq
-do
+for d in curl jq; do
   [[ -z "$(command -v "$d")" ]] && echoerr "${d} dependency is not installed\nplease install the dependency for the script to work"
 done
 
 help_message() {
-echo "usage: $0 [option] [--suboption] [theme OR font]
-  remove:
-    -f, --font
-    -t, --theme
-    -a, --all
-
-  install:
-    -f, --font 
-    -t, --theme
-
-  set:
-    -f, --font
-    -t, --theme
-
-  list:
-    -f, --font
-    -t, --theme
-    -a, --all"
+	cat << EOF 
+usage: $0 [option] [theme OR font]
+global commands:
+  install   Install themes or fonts
+  remove    Remove themes or fonts
+  list      Lists the themes and fonts that are available, installed and established
+  set       establish theme or font
+variable commands:
+  --help
+  --version
+EOF
 }
 
 [[ ! -f "$json_file" ]] && echoerr "the download source store was deleted or renamed\nwithout this file the script will be unusable"
 
 install_ft_files() {
-	local subcommand="$1"
+	local subcommand="${1:---help}"
 	local filename="$2"
 	local download_sources
 	local target_file
@@ -71,12 +67,21 @@ install_ft_files() {
 			target_file="$FONTS_DIRECTORY/$filename.ttf"
 			[[ ! -d "$FONTS_DIRECTORY" ]] && mkdir -p "$FONTS_DIRECTORY"
 			;;
-
 		-t | --theme)
-			download_sources="$(jq -r ".\"colorschemes\".\"$filename\"" "$json_file")"
+			download_sources="$(jq -r ".\"themes\".\"$filename\"" "$json_file")"
 			target_file="$THEMES_DIRECTORY/$filename.properties"
 			[[ ! -d "$THEMES_DIRECTORY" ]] && mkdir -p "$THEMES_DIRECTORY"
 			;;
+    --help)
+    cat<<EOF
+You must specify what font or theme you must install:
+  --font <font-name>   install a font
+  --theme <theme-name>  install a theme
+You can only download fonts or themes that are available
+if you want to know write '$0 list' to find out the available fonts or themes
+EOF
+      return
+      ;;
 		*)
 			echoerr "invalid option: $subcommand"
 			;;
@@ -86,8 +91,7 @@ install_ft_files() {
 	[[ -e "$target_file" ]] && echoerr "you already have it installed stupid"
 
   echo -e "Downloading \e[1m$filename\e[0m"
-	if ! curl -# -fSLo "$target_file" "$download_sources"
-	then
+	if ! curl -# -fSLo "$target_file" "$download_sources"; then
 		echoerr "\033[31mdownload error\033[0m: maybe the URL has been changed or deleted"
 	fi
 	
@@ -102,10 +106,10 @@ list_ft() {
   local downloaded_themes
   local downloaded_fonts
 
-  registred_themes="$(jq -r '.["colorschemes"] | keys | .[]' "$json_file")"
+  registred_themes="$(jq -r '.["themes"] | keys | .[]' "$json_file")"
   registred_fonts="$(jq -r '.["fonts"] | keys | .[]' "$json_file")"
-  downloaded_themes="$(find "$THEMES_DIRECTORY" -type f -print0 | xargs -0 -n 1 basename 2>/dev/null | sed 's/.properties$//' || true)"
-  downloaded_fonts="$(find "$FONTS_DIRECTORY" -type f -print0 | xargs -0 -n 1 basename 2>/dev/null | sed 's/.ttf$//' || true)"
+  downloaded_themes="$(find "$THEMES_DIRECTORY" -type f -print0 2>/dev/null | xargs -0 -n 1 basename 2>/dev/null | sed 's/.properties$//' || true)"
+  downloaded_fonts="$(find "$FONTS_DIRECTORY" -type f -print0 2>/dev/null | xargs -0 -n 1 basename 2>/dev/null | sed 's/.ttf$//' || true)"
   
   
   case "$subcommand" in
@@ -115,10 +119,8 @@ list_ft() {
       echo "fonts:"
       for FONT in $registred_fonts
       do
-        if echo "$downloaded_fonts" | grep -q "^$FONT$"
-        then
-          if cmp -s "$TERMUX_FONT_PATH" "$FONTS_DIRECTORY/$FONT.ttf"
-          then 
+        if echo "$downloaded_fonts" | grep -q "^$FONT$"; then
+          if cmp -s "$TERMUX_FONT_PATH" "$FONTS_DIRECTORY/$FONT.ttf"; then 
             echo -e "< \033[1;36m$FONT\033[0m >"
           else 
             echo -e "  \033[36m$FONT\033[0m"
@@ -131,10 +133,8 @@ list_ft() {
       echo "themes:"
       for THEME in $registred_themes
       do
-        if echo "$downloaded_themes" | grep -q "^$THEME$"
-        then
-          if cmp -s "$TERMUX_THEME_PATH" "$THEMES_DIRECTORY/$THEME.properties"
-          then 
+        if echo "$downloaded_themes" | grep -q "^$THEME$"; then
+          if cmp -s "$TERMUX_THEME_PATH" "$THEMES_DIRECTORY/$THEME.properties"; then 
             echo -e "< \033[1;36m$THEME\033[0m >"
           else 
             echo -e "  \033[36m$THEME\033[0m"
@@ -144,17 +144,14 @@ list_ft() {
         echo "  $THEME"
       done
       ;;
-
     -f | --font)
       [[ -z "$registred_fonts" ]] && echoerr "no registred fonts found"
   
       echo "fonts:"
       for FONT in $registred_fonts
       do
-        if echo "$downloaded_fonts" | grep -q "^$FONT$"
-        then
-          if cmp -s "$TERMUX_FONT_PATH" "$FONTS_DIRECTORY/$FONT.ttf"
-          then 
+        if echo "$downloaded_fonts" | grep -q "^$FONT$"; then
+          if cmp -s "$TERMUX_FONT_PATH" "$FONTS_DIRECTORY/$FONT.ttf"; then 
             echo -e "< \033[1;36m$FONT\033[0m >"
           else 
             echo -e "  \033[36m$FONT\033[0m"
@@ -164,17 +161,14 @@ list_ft() {
         echo "  $FONT"
       done
       ;;
-
     -t | --theme)
       [[ -z "$registred_themes" ]] && echoerr "no registred themes found"
 
       echo "themes:"
       for THEME in $registred_themes
       do
-        if echo "$downloaded_themes" | grep -q "^$THEME$"
-        then
-          if cmp -s "$TERMUX_THEME_PATH" "$THEMES_DIRECTORY/$THEME.properties"
-          then 
+        if echo "$downloaded_themes" | grep -q "^$THEME$"; then
+          if cmp -s "$TERMUX_THEME_PATH" "$THEMES_DIRECTORY/$THEME.properties"; then 
             echo -e "< \033[1;36m$THEME\033[0m >"
           else 
             echo -e "  \033[36m$THEME\033[0m"
@@ -184,7 +178,6 @@ list_ft() {
         echo "  $THEME"
       done
       ;;
-
     *)
       echo "$0: $1: invalid option"
       ;;
@@ -198,8 +191,7 @@ remove_ft_files() {
 	case "$subcommand" in
 		-a | --all)
 			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]] && \
-				[[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
-			then
+				[[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]; then
 				echoerr "everything was already erased"
 			fi
 			rm -rf "${THEMES_DIRECTORY:?}"/*
@@ -207,15 +199,12 @@ remove_ft_files() {
 			echo "fonts and themes removed successfully"
 			return
 			;;
-
 		-f | --font)
-			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]]
-			then
+			if [[ ! -d "$FONTS_DIRECTORY" || -z "$(ls -A "$FONTS_DIRECTORY")" ]]; then
 				echoerr "no fonts to remove."
 			fi
 
-			if [[ ! -f "${FONTS_DIRECTORY}/${filename}.ttf" ]] 
-			then
+			if [[ ! -f "${FONTS_DIRECTORY}/${filename}.ttf" ]]; then
 				echoerr "this font could not be found because it does not exist."
 			fi
 
@@ -223,15 +212,12 @@ remove_ft_files() {
 			echo "font has been removed successfully"
 			return
 			;;
-
 		-t | --theme)
-			if [[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]
-			then
+			if [[ ! -d "$THEMES_DIRECTORY" || -z "$(ls -A "$THEMES_DIRECTORY")" ]]; then
 				echoerr "no themes to remove."
 			fi
 
-			if [[ ! -f "${THEMES_DIRECTORY}/${filename}.properties" ]]
-			then
+			if [[ ! -f "${THEMES_DIRECTORY}/${filename}.properties" ]]; then
 				echoerr "this color scheme could not be found because it does not exist"
 			fi
 
@@ -239,7 +225,6 @@ remove_ft_files() {
 			echo "the theme has been removed successfully"
 			return
 			;;
-
 		*)
 			echoerr "$0: $1: invalid option"
 			;;
@@ -252,15 +237,12 @@ set_ft() {
 
   case "$subcommand" in
     -f|--font)
-
-      if [[ "$filename" == "default" ]]
-      then
+      if [[ "$filename" == "default" ]]; then
         rm "$TERMUX_FONT_PATH"
         reload_settings
         echo "done"
         return
       fi
-
       [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && echoerr "\033[31merror\033[0m: This font apparently does not exist"
 
       cp "$FONTS_DIRECTORY/$filename.ttf" "$TERMUX_FONT_PATH"
@@ -268,15 +250,12 @@ set_ft() {
       echo "$filename done"
       ;;
     -t|--theme)
-
-      if [[ "$filename" == "default" ]]
-      then
+      if [[ "$filename" == "default" ]]; then
         rm "$TERMUX_THEME_PATH"
         reload_settings
         echo "done"
         return
-      fi
-      
+      fi      
       [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && echoerr "this theme '$filename' not exists"
 
       cp "$THEMES_DIRECTORY/$filename.properties" "$TERMUX_THEME_PATH"
@@ -297,10 +276,10 @@ main() {
   [[ "$#" -lt 1 || "$#" -gt 3 ]] && echoerr "type '$0 --help' for more info"
 
   case "$command" in
-	  install)
+	  in|install)
 		  install_ft_files "$subcommand" "$filename"
 		  ;;
-	  remove)
+	  rem|remove)
 		  remove_ft_files "$subcommand" "$filename"
 		  ;;
     list)
