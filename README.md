@@ -2,7 +2,7 @@
 a termux tool to easily install nerd fonts and themes 
 
 ### Preview
-![Preview](.screenshots/1.jpg)
+![Description](.screenshots/1.jpg){width=200}
 
 ## installation and dependencies
 
