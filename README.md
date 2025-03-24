@@ -1,17 +1,17 @@
 # Pruner 
-a termux tool to easily install nerd fonts and themes 
+A Termux tool to easily install Nerd Fonts and themes.
 
 ### Preview
 <img src=".screenshots/1.jpg" width="400">
 
 ## installation and dependencies
 
-install the following dependencies:
+Install the following dependencies:
 ``` sh
 pkg add curl jq -y
 ```
 
-then clone the repository and enter its directory:
+Then clone the repository and enter its directory:
 ```sh
 git clone https://github.com/Y3rw1N/pruner.git
 cd pruner
