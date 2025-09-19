@@ -5,7 +5,7 @@
 		"hack": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/Hack/Regular/HackNerdFontMono-Regular.ttf",
     "iconsolata": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/Inconsolata/InconsolataNerdFont-Regular.ttf",
     "iosevka": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/Iosevka/IosevkaNerdFontMono-Regular.ttf",
-    "ibm-plex-mono": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/IBMPlexMono/Mono/BlexMonoNerdFont-Regular.ttf",
+    "ibm-plex-mono": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/IBMPlexMono/Mono/BlexMonoNerdFontMono-Regular.ttf",
     "iosevka-term": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/IosevkaTerm/IosevkaTermNerdFontMono-Regular.ttf",
     "jetbrains-mono": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFont-Regular.ttf",
 		"jetbrains-mono-nl": "https://github.com/ryanoasis/nerd-fonts/raw/refs/heads/master/patched-fonts/JetBrainsMono/NoLigatures/Regular/JetBrainsMonoNLNerdFontMono-Regular.ttf",

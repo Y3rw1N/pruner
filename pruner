@@ -24,14 +24,24 @@ PRUNER_DIRECTORY="$TERMUX_DIRECTORY/.pruner"
 THEMES_DIRECTORY="$PRUNER_DIRECTORY/themes"
 FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
-BOLD="\033[1m"
-CYAN_BOLD="\033[1;36m"
+BOLD=$(tput bold)
+CYAN_BOLD=$(tput setaf 6; tput bold)
 
-RESET="\033[0m"
-RED="\033[31m"
-GREEN="\033[32m"
-YELLOW="\033[33m"
-CYAN="\033[36m"
+RESET=$(tput sgr0)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+CYAN=$(tput setaf 6)
+
+
+# BOLD="\033[1m"
+# CYAN_BOLD="\033[1;36m"
+
+# RESET="\033[0m"
+# RED="\033[31m"
+# GREEN="\033[32m"
+# YELLOW="\033[33m"
+# CYAN="\033[36m"
 
 echoerr() {
 	printf "%s\n" "$@" >&2	
