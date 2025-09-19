@@ -6,7 +6,7 @@
 # The script is intended for Android with the Termux terminal emulator installed
 
 set -euo pipefail
-trap 'echo "There is an error on line $LINENO"; exit 1' ERR
+trap 'printf "Error on line %s\n" "$LINENO" >&2; exit 1' ERR
 
 source "$(dirname "$0")/lib/reload-termux-config"
 
@@ -62,9 +62,8 @@ ensure_dir() {
 
 install_ft_files() {
 	local subcommand="${1:---help}"
-	local filename="$2"
-	local download_sources
-	local target_file
+	local filename="${2:-}"
+	local download_sources target_file
 
 	case "$subcommand" in
 		-f | --font)
@@ -186,8 +185,8 @@ list_ft() {
 }
 
 remove_ft_files() {
-	local subcommand="$1"
-	local filename="$2"
+  local subcommand="${1:-}"
+  local filename="${2:-}"
 
 	case "$subcommand" in
 		-a | --all)
@@ -232,8 +231,8 @@ remove_ft_files() {
 }
 
 set_ft() {
-  local subcommand="$1"
-  local filename="$2"
+  local subcommand="${1:-}"
+  local filename="${2:-}"
 
   case "$subcommand" in
     -f|--font)
@@ -269,35 +268,22 @@ set_ft() {
 }
 
 main() {
-  local command="$1"
-  local subcommand="$2"
-  local filename="$3"
+  local command="${1:-}"
+  local subcommand="${2:-}"
+  local filename="${3:-}"
 
-  [[ "$#" -lt 1 || "$#" -gt 3 ]] && echoerr "type '$0 --help' for more info"
+  if [[ $# -lt 1 || $# -gt 3 ]]; then
+    echoerr "type '$0 --help' for more info"
+  fi
 
   case "$command" in
-	  in|install)
-		  install_ft_files "$subcommand" "$filename"
-		  ;;
-	  rem|remove)
-		  remove_ft_files "$subcommand" "$filename"
-		  ;;
-    list)
-      list_ft "$subcommand"
-      ;;
-    set)
-      set_ft "$subcommand" "$filename"
-      ;;
-    --version)
-      echo "$SCRIPT_VERSION"
-      ;;
-	  --help)
-      [[ "$#" -ne 1 ]] && echoerr "not exist subcommand"
-		  help_message
-		  ;;
-	  *)
-		  echoerr "argument not found: $1\ntype '$0 --help' for more info"
-		  ;;
+	  in|install) install_ft_files "$subcommand" "$filename" ;;
+	  rem|remove) remove_ft_files "$subcommand" "$filename" ;;
+    list) list_ft "$subcommand" ;;
+    set) set_ft "$subcommand" "$filename" ;;
+    --version) echo "$SCRIPT_VERSION" ;;
+	  --help) help_message ;;
+	  *) echoerr "argument not found: $1\ntype '$0 --help' for more info" ;;
   esac
 }
 
