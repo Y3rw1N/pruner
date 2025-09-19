@@ -24,6 +24,7 @@ PRUNER_DIRECTORY="$TERMUX_DIRECTORY/.pruner"
 THEMES_DIRECTORY="$PRUNER_DIRECTORY/themes"
 FONTS_DIRECTORY="$PRUNER_DIRECTORY/fonts"
 # ----
+# Colors
 BOLD=$(tput bold)
 CYAN_BOLD=$(tput setaf 6; tput bold)
 
@@ -32,17 +33,7 @@ RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 YELLOW=$(tput setaf 3)
 CYAN=$(tput setaf 6)
-
-
-# BOLD="\033[1m"
-# CYAN_BOLD="\033[1;36m"
-
-# RESET="\033[0m"
-# RED="\033[31m"
-# GREEN="\033[32m"
-# YELLOW="\033[33m"
-# CYAN="\033[36m"
-
+# ----
 echoerr() {
 	printf "%s\n" "$@" >&2	
 	exit 1
@@ -53,7 +44,7 @@ if [[ "${OSTYPE:-}" != "linux-android" ]]; then
 fi
 
 # CHECK FOR MISSING DEPENDENCIES
-for d in curl jq; do
+for d in curl jq tput; do
   [[ -z "$(command -v "$d")" ]] && echoerr "${d} dependency is not installed\nplease install the dependency for the script to work"
 done
 
@@ -197,7 +188,7 @@ list_ft() {
       done
       ;;
     *)
-      echoerr "$0: $1: invalid option\n"
+      echoerr "$0: $1: invalid option"
       ;;
   esac
 }
@@ -257,7 +248,7 @@ set_ft() {
       if [[ "$filename" == "default" ]]; then
         rm -f -- "$TERMUX_FONT_PATH"
         reload_settings
-        printf "done\n"
+        printf "%sdone%s\n" "$GREEN" "$RESET"
         return
       fi
       [[ ! -f "$FONTS_DIRECTORY/$filename.ttf" ]] && echoerr "${RED}error${RESET}: This font apparently does not exist"
@@ -270,7 +261,7 @@ set_ft() {
       if [[ "$filename" == "default" ]]; then
         rm "$TERMUX_THEME_PATH"
         reload_settings
-        printf "done\n"
+        printf "%sdone%s\n" "$GREEN" "$RESET"
         return
       fi      
       [[ ! -f "$THEMES_DIRECTORY/$filename.properties" ]] && echoerr "this theme '$filename' not exists"
